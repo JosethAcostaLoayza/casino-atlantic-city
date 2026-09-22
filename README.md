@@ -344,3 +344,10 @@ SMTP
 ```
 
 El procesamiento es asíncrono mediante RabbitMQ y permite realizar la trazabilidad de una carga desde `Pendiente` hasta `Notificado`.
+
+
+## Video de demostración
+
+Video corto mostrando el flujo completo de la solución funcionando.
+
+[Ver video de demostración](./docs/RetoTecnico_AtlanticCity_JosethAcosta.mp4)
