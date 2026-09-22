@@ -1,0 +1,144 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: casino-postgres
+    environment:
+      POSTGRES_DB: casino_authentication
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d casino_authentication"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: casino-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: casino-seaweedfs
+    command: server -dir=/data -ip=0.0.0.0 -master.port=9333 -volume.port=8080 -filer -filer.port=8888
+    ports:
+      - "9333:9333"
+      - "8080:8080"
+      - "8888:8888"
+    volumes:
+      - seaweedfs_data:/data
+
+  smtp4dev:
+    image: rnwood/smtp4dev:latest
+    container_name: casino-smtp4dev
+    ports:
+      - "5000:80"
+      - "2525:25"
+
+  authentication:
+    build:
+      context: .
+      dockerfile: ./src/Authentication/Dockerfile
+    container_name: casino-authentication
+    environment:
+      ConnectionStrings__AuthenticationDb: "Host=postgres;Port=5432;Database=casino_authentication;Username=postgres;Password=postgres"
+      Jwt__SecretKey: "CasinoAtlanticCity-SecretKey-Development-2026"
+      Jwt__ExpirationMinutes: "60"
+      ASPNETCORE_URLS: "http://+:8080"
+    ports:
+      - "5170:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  control:
+    build:
+      context: .
+      dockerfile: ./src/Control/Dockerfile
+    container_name: casino-control
+    environment:
+      ConnectionStrings__ControlDb: "Host=postgres;Port=5432;Database=casino_control;Username=postgres;Password=postgres"
+      Jwt__SecretKey: "CasinoAtlanticCity-SecretKey-Development-2026"
+      InternalApiKey: "ControlInternalKey-Development-2026"
+      FileUpload__MaxFileSizeMb: "10"
+      ASPNETCORE_URLS: "http://+:8080"
+    ports:
+      - "5264:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  carga-masiva:
+    build:
+      context: .
+      dockerfile: ./src/CargaMasiva/Dockerfile
+    container_name: casino-carga-masiva
+    environment:
+      ConnectionStrings__CargaMasivaDb: "Host=postgres;Port=5432;Database=casino_carga_masiva;Username=postgres;Password=postgres"
+      Control__BaseUrl: "http://control:8080/"
+      Control__InternalApiKey: "ControlInternalKey-Development-2026"
+      ASPNETCORE_URLS: "http://+:8080"
+    ports:
+      - "5270:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      control:
+        condition: service_started
+
+  notificaciones:
+    build:
+      context: .
+      dockerfile: ./src/Notificaciones/Dockerfile
+    container_name: casino-notificaciones
+    environment:
+      Control__BaseUrl: "http://control:8080/"
+      Control__InternalApiKey: "ControlInternalKey-Development-2026"
+      Smtp__Host: "smtp4dev"
+      Smtp__Port: "25"
+      Smtp__From: "notificaciones@atlanticcity.local"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      control:
+        condition: service_started
+      smtp4dev:
+        condition: service_started
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./src/ApiGateway/Dockerfile
+    container_name: casino-api-gateway
+    environment:
+      Jwt__SecretKey: "CasinoAtlanticCity-SecretKey-Development-2026"
+      ASPNETCORE_URLS: "http://+:8080"
+    ports:
+      - "5287:8080"
+    depends_on:
+      authentication:
+        condition: service_started
+      control:
+        condition: service_started
+      carga-masiva:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  seaweedfs_data:
+  rabbitmq_data:

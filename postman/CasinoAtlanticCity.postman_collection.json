@@ -1,0 +1,257 @@
+{
+  "info": {
+    "_postman_id": "f3d212f8-2f74-4103-9ecf-d73e610a5807",
+    "name": "CasinoAtlanticCity",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "45851070",
+    "_collection_link": "https://go.postman.co/collection/45851070-f3d212f8-2f74-4103-9ecf-d73e610a5807?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "POST Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\nconst token = json.accessToken ?? json.token;\r\n\r\nif (!token) {\r\n    throw new Error(\"No se encontró el token en la respuesta del login.\");\r\n}\r\n\r\npm.collectionVariables.set(\"accessToken\", token);\r\n\r\nconsole.log(\"Token guardado correctamente.\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"admin@atlanticcity.com\",\r\n  \"password\": \"Admin123*\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5287/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5287",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Control",
+      "item": [
+        {
+          "name": "POST Crear carga",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "archivo",
+                  "type": "file",
+                  "src": [
+                    "/C:/Users/jacosta2/OneDrive - SEIDOR SOLUTIONS S.L/Escritorio/carga_prueba.xlsx"
+                  ]
+                },
+                {
+                  "key": "periodo",
+                  "value": "202601",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5264/api/cargas",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5264",
+              "path": [
+                "api",
+                "cargas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Listar cargas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5264/api/cargas",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5264",
+              "path": [
+                "api",
+                "cargas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Obtener carga",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5264/api/cargas/eac0840d-c574-491c-822b-74739d28cde9",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5264",
+              "path": [
+                "api",
+                "cargas",
+                "eac0840d-c574-491c-822b-74739d28cde9"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Actualizar estado",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Internal-Key",
+                "value": "ControlInternalKey-Development-2026"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"estado\": \"Finalizado\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5264/api/cargas/3cff4ac2-3727-47d2-b2f6-901c39b05bda/estado",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5264",
+              "path": [
+                "api",
+                "cargas",
+                "3cff4ac2-3727-47d2-b2f6-901c39b05bda",
+                "estado"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Obtener detalle carga",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5287/api/cargas/b6d0f4ca-15b7-4e5a-b105-a308fa6dd098/contenido",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5287",
+              "path": [
+                "api",
+                "cargas",
+                "b6d0f4ca-15b7-4e5a-b105-a308fa6dd098",
+                "contenido"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ]
+}
