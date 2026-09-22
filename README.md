@@ -350,4 +350,5 @@ El procesamiento es asíncrono mediante RabbitMQ y permite realizar la trazabili
 
 Video corto mostrando el flujo completo de la solución funcionando.
 
-[Ver video de demostración](./docs/RetoTecnico_AtlanticCity_JosethAcosta.mp4)
+[Ver video de demostración](https://github.com/JosethAcostaLoayza/casino-atlantic-city/blob/main/docs/RetoTecnico_AtlanticCity_JosethAcosta.mp4)
+
